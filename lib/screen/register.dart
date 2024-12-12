@@ -15,6 +15,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Profile profile = Profile(); // สร้างออบเจ็กต์ Profile
   String? confirmPassword; // ตัวแปรสำหรับเก็บรหัสผ่านที่ยืนยัน
 
+  // ตัวอย่าง RegEx สำหรับตรวจสอบรหัสผ่าน
+  final passwordValidator = MultiValidator([
+    RequiredValidator(errorText: "กรุณาป้อนรหัสผ่าน"),
+    MinLengthValidator(8,
+        errorText: "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร"),
+    PatternValidator(r'(?=.*[a-z])',
+        errorText: "ต้องมีตัวอักษรพิมพ์เล็กอย่างน้อย 1 ตัว"),
+    PatternValidator(r'(?=.*[A-Z])',
+        errorText: "ต้องมีตัวอักษรพิมพ์ใหญ่อย่างน้อย 1 ตัว"),
+    PatternValidator(r'(?=.*\d)', errorText: "ต้องมีตัวเลขอย่างน้อย 1 ตัว"),
+    PatternValidator(r'(?=.*[@$!%*?&])',
+        errorText: "ต้องมีตัวอักษรพิเศษอย่างน้อย 1 ตัว"),
+  ]);
+
+  // ตัวอย่าง RegEx สำหรับตรวจสอบอีเมล
+  final emailValidator = MultiValidator([
+    RequiredValidator(errorText: "กรุณาป้อนอีเมล"),
+    PatternValidator(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      errorText: "รูปแบบอีเมลไม่ถูกต้อง",
+    ),
+  ]);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,10 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  validator: MultiValidator([
-                    RequiredValidator(errorText: "กรุณาป้อนอีเมล"),
-                    EmailValidator(errorText: "รูปแบบอีเมลไม่ถูกต้อง"),
-                  ]),
+                  validator: emailValidator,
                   onSaved: (String? email) {
                     profile.email = email; // บันทึกอีเมลลงใน Profile
                   },
@@ -92,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  validator: RequiredValidator(errorText: "กรุณาป้อนรหัสผ่าน"),
+                  validator: passwordValidator,
                   obscureText: true,
                   onSaved: (String? password) {
                     profile.password = password; // บันทึกรหัสผ่านลงใน Profile
@@ -143,6 +163,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         // พิมพ์ค่าหลังจากบันทึกข้อมูล
                         print(
                             "Username: ${profile.username}, Email: ${profile.email}, Password: ${profile.password}");
+
+                        // แสดงข้อความ "ลงทะเบียนสำเร็จ"
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("ลงทะเบียนสำเร็จ"),
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
 
                         // ย้ายไปที่หน้า HomeScreen หลังจากลงทะเบียนสำเร็จ
                         Navigator.pushAndRemoveUntil(
